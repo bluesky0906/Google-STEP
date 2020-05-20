@@ -8,7 +8,7 @@
             "type": "shell",
             "command": "g++",
             "args": [
-				"-o", "build/${fileBasenameNoExtension}", "${file}",
+				"-o", "build/${fileBasenameNoExtension}", "${File}",
 				"&&",
 				"./build/${fileBasenameNoExtension}"
             ],
