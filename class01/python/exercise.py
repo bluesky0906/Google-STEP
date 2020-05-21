@@ -1,6 +1,7 @@
 import time
 from selenium import webdriver
-sorted_dic_path = '../data/sorted_dictionary.txt'
+
+DIC_NAME = '../data/dictionary.txt'
 
 # 二分探索
 def my_binary_search(trg, dic):
@@ -18,16 +19,35 @@ def my_binary_search(trg, dic):
             left = mid + 1
     return -1
 
+# 文字列をsortする関数
+def quick_sort_string(arr):
+    if len(arr) <= 1:
+        return arr
+
+    partition = arr[0]
+    count = 0
+    left = ''
+    right = ''
+
+    for ele in arr:
+        if partition > ele:
+            left += ele
+        elif partition < ele:
+            right += ele
+        else:
+            count += 1
+    return quick_sort_string(left) + (partition * count) + quick_sort_string(right)
+
 # 辞書を読む
 def read_dictionary(path):
     with open(path) as f:
         lines = [s.strip() for s in f.readlines()]
     return lines
 
-# 辞書を読んで空白区切りにする
-def read_created_dictionary(path):
+# ソートされた辞書を作る
+def create_sorted_dictionary(path):
     lines = read_dictionary(path)
-    dic = [line.split(' ') for line in lines]
+    dic = {quick_sort_string(line): line for line in lines}
     return dic
 
 # quについて
@@ -49,33 +69,13 @@ def string_combination_solution(s, dic):
         current_candidates = candidates.copy()
         for prev in current_candidates:
             new_candidates = prev + c
-            key = my_binary_search(new_candidates, dic)
-            if key >= 0:
-                anagrams.append(dic[key][1])
+            if new_candidates in dic :
+                anagrams.append(dic[new_candidates])
             candidates.append(new_candidates)
 
     # quについての条件を満たさない場合は消す
     considerd_anagrams = consider_qu(s, anagrams)
     return considerd_anagrams
-
-# 文字列をsortする関数
-def quick_sort_string(arr):
-    if len(arr) <= 1:
-        return arr
-
-    partition = arr[0]
-    count = 0
-    left = ''
-    right = ''
-
-    for ele in arr:
-        if partition > ele:
-            left += ele
-        elif partition < ele:
-            right += ele
-        else:
-            count += 1
-    return quick_sort_string(left) + (partition * count) + quick_sort_string(right)
 
 # 点数計算
 def calculate_score(s):
@@ -104,7 +104,7 @@ def choose_answer(anagrams):
 
 if __name__ == '__main__':
     # 辞書の読み込み
-    dic = read_created_dictionary(sorted_dic_path)
+    dic = create_sorted_dictionary(DIC_NAME)
     driver = webdriver.Chrome()
     driver.get('https://icanhazwordz.appspot.com/')
 
@@ -114,15 +114,15 @@ if __name__ == '__main__':
         elem1 = driver.find_elements_by_css_selector('.letter.p1')
         elem2 = driver.find_elements_by_css_selector('.letter.p2')
         elem3 = driver.find_elements_by_css_selector('.letter.p3')
-
+        time.sleep(1)
         elems = elem1 + elem2 + elem3
 
         input_string = ''
         for elem in elems :
+            el = elem.text
             input_string += elem.text.lower()
         # 入力をsortする
         s = quick_sort_string(input_string)
-        
         # anagramの候補
         anagrams = string_combination_solution(s, dic)
         # 一番得点が高いものを選ぶ
