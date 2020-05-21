@@ -56,7 +56,7 @@ def create_sorted_dictionary(path):
 def consider_qu (input_string, anagrams):
     input_q = input_string.count('q')
     input_u = input_string.count('u')
-    if input_q < 0 :
+    if input_q <= 0 :
         return anagrams
 
     considerd_anagram = [anagram for anagram in anagrams if (anagram.count('u') - anagram.count('q')) <= (input_u - input_q)]
@@ -102,7 +102,6 @@ def choose_answer(anagrams):
             highest_answer = anagram
             highest = score
     return (highest_answer, highest)
-    
 
 if __name__ == '__main__':
     # 辞書の読み込み
@@ -142,7 +141,7 @@ if __name__ == '__main__':
     
     # 記録するかどうか
     print(score)
-    if score > 1900 :
+    if score > 1800 :
         nick_name = driver.find_element_by_name('NickName')
         nick_name.send_keys('sora')
         name = driver.find_element_by_name('Name')
