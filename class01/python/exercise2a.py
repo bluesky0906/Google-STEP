@@ -1,5 +1,6 @@
-import time
+from webdriver import get_input, send_answer, record_score
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 DIC_NAME = '../data/dictionary.txt'
 
@@ -104,50 +105,40 @@ def choose_answer(anagrams):
     return (highest_answer, highest)
 
 if __name__ == '__main__':
+    options = Options()
+    options.add_argument('--headless')
     # 辞書の読み込み
     dic = create_sorted_dictionary(DIC_NAME)
-    driver = webdriver.Chrome()
-    driver.get('https://icanhazwordz.appspot.com/')
-
-    try_count = 0
-    score = 0
-    while (try_count < 10):
-        elem1 = driver.find_elements_by_css_selector('.letter.p1')
-        elem2 = driver.find_elements_by_css_selector('.letter.p2')
-        elem3 = driver.find_elements_by_css_selector('.letter.p3')
-        time.sleep(1)
-        elems = elem1 + elem2 + elem3
-
-        input_string = ''
-        for elem in elems :
-            el = elem.text
-            input_string += elem.text.lower()
-        # 入力をsortする
-        s = quick_sort_string(input_string)
-        # anagramの候補
-        anagrams = string_combination_solution(s, dic)
-        # 一番得点が高いものを選ぶ
-        answer = choose_answer(anagrams)
-        score += answer[1]
-
-        # 入力
-        form = driver.find_element_by_id('MoveField')
-        form.send_keys(answer[0])
-        # Submitボタン
-        button = driver.find_element_by_xpath("//input[@value='Submit']")
-        button.click()
-
-        try_count += 1
+    driver = webdriver.Chrome(options=options)
     
-    # 記録するかどうか
-    print(score)
-    if score > 1800 :
-        nick_name = driver.find_element_by_name('NickName')
-        nick_name.send_keys('sora')
-        name = driver.find_element_by_name('Name')
-        name.send_keys('Sora Tagami')
-        email = driver.find_element_by_name('Email')
-        email.send_keys('bluesky0906.design@gmail.com')
-        button = driver.find_element_by_xpath("//input[@value='Record!']")
-        button.click()
+    count = 10000
+    while (count > 0) :
+        driver.get('https://icanhazwordz.appspot.com/')
+
+        try_count = 0
+        score = 0
+        while (try_count < 10):
+            input_string = get_input(driver)
+            # 入力をsortする
+            s = quick_sort_string(input_string)
+            # anagramの候補
+            anagrams = string_combination_solution(s, dic)
+            # 一番得点が高いものを選ぶ
+            answer = choose_answer(anagrams)
+            score += answer[1]
+
+            send_answer(driver, answer[0])
+
+            try_count += 1
+        
+        # 記録するかどうか
+        print(score)
+        if score > 1920 :
+            record_score(driver)
+            break
+
+        count -= 1
+
     driver.quit()
+    # Xvfbを終了
+    display.stop()
