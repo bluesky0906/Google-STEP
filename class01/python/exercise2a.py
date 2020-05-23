@@ -133,12 +133,9 @@ if __name__ == '__main__':
         
         # 記録するかどうか
         print(score)
-        if score > 1920 :
+        if score > 2100 :
             record_score(driver)
-            break
 
         count -= 1
 
     driver.quit()
-    # Xvfbを終了
-    display.stop()

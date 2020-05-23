@@ -29,5 +29,7 @@ def record_score(driver):
     name.send_keys('Sora Tagami')
     email = driver.find_element_by_name('Email')
     email.send_keys('bluesky0906.design@gmail.com')
+    robot = driver.find_element_by_xpath("//input[@value='Robot']")
+    robot.click()
     button = driver.find_element_by_xpath("//input[@value='Record!']")
     button.click()
