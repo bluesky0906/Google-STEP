@@ -1,5 +1,10 @@
 import numpy, sys, time
+from tqdm import tqdm
+
 PATH ='data/ex01_python.txt'
+N_OF_TRIALS = 30
+
+# n=100までを10回ずつ繰り返し、平均をとったデータをPATHに出力
 
 def matrix_multi(n: int) -> float:
     a = numpy.zeros((n, n)) # Matrix A
@@ -17,10 +22,8 @@ def matrix_multi(n: int) -> float:
 
     for i in range(n):
         for j in range(n):
-            sum = 0
             for k in range(n):
-                sum += a[i][k] * b[k][j]
-            c[i,j] = sum
+                c[i,j] += a[i][k] * b[k][j]
 
     end = time.time()
     time_result = end - begin
@@ -30,8 +33,17 @@ def matrix_multi(n: int) -> float:
 
 if __name__ == '__main__':
     results = []
-    for i in range(2,101):
-        results.append(f'{i}\t{matrix_multi(i):e}')
+    # progress bar
+    bar = tqdm(total = 200)
+    # 説明文を追加
+    bar.set_description('Progress rate')
+    for i in range(2,201):
+        sum = 0.0
+        for j in range (N_OF_TRIALS) :
+            sum += matrix_multi(i) 
+        # 進捗を設定
+        bar.update(1)
+        results.append(f'{i}\t{sum/N_OF_TRIALS:e}')
 
     #results_str = [format(f, 'e') for f in results]
     with open(PATH, mode='w') as f:

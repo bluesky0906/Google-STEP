@@ -2,7 +2,7 @@
 #include <sys/time.h>
 using namespace std;
 string PATH = "data/ex01_cpp.txt";
-int N_OF_TRIALS = 10;
+int N_OF_TRIALS = 30;
 
 double get_time()
 {
@@ -49,12 +49,12 @@ float matrix_multi(int n)
 
 int main()
 {
-    double sum = 0;
     vector<double> results;
     ofstream outputfile(PATH);
 
-    for (int i = 2; i <= 100; i++)
+    for (int i = 2; i <= 200; i++)
     {
+        double sum = 0;
         for (int j = 0; j < N_OF_TRIALS; j++)
         {
             sum += matrix_multi(i);
