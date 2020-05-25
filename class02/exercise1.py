@@ -4,7 +4,7 @@ from tqdm import tqdm
 PATH ='data/ex01_python.txt'
 N_OF_TRIALS = 30
 
-# n=100までを10回ずつ繰り返し、平均をとったデータをPATHに出力
+# n=200までを30回ずつ繰り返し、平均をとったデータをPATHに出力
 
 def matrix_multi(n: int) -> float:
     a = numpy.zeros((n, n)) # Matrix A

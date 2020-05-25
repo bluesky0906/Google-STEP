@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # グラフに描画
+# python exercise_plot.py
 
 # Pythonを読み込み
 py_df = pd.read_table('data/ex01_python.txt', header = None)

@@ -4,6 +4,8 @@ using namespace std;
 string PATH = "data/ex01_cpp.txt";
 int N_OF_TRIALS = 30;
 
+// n=200までを30回ずつ繰り返し、平均をとったデータをPATHに出力
+
 double get_time()
 {
     struct timeval tv;
