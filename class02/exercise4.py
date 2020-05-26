@@ -9,53 +9,64 @@ class Cache:
     # Initializes the cache.
     # |n|: The size of the cache.
     def __init__(self, n):
-        self.map = dict()
+        self.map = [None] * n * 100
         self.head = None
         self.tail = None
         self.capacity = n
+        self.current_len = 0
+
+    def hash(self, key):
+        num = 0
+        for k in key:
+            num += ord(k)
+        return num % (self.capacity * 100)
 
     # Access a page and update the cache so that it stores the most
     # recently accessed N pages. This needs to be done with mostly O(1).
     # |url|: The accessed URL
     # |contents|: The contents of the URL
     def access_page(self, url, contents):
+        idx = self.hash(url)
+        print(idx, url)
         # Cacheに保存されてる要素にアクセスされた時
-        if (url in self.map):
-            # 先頭の要素だったら
+        if (self.map[idx] != None):
+            # 最初の要素だったら
             if url == self.head['key']:
-                return 
+                return
             # 次の要素が格納されているか
-            if self.map[url]['next']:
-                self.map[url]['next']['prev'] = self.map[url]['prev']
+            if self.map[idx]['next']:
+                self.map[idx]['next']['prev'] = self.map[idx]['prev']
             # 前の要素が格納されているか
-            if self.map[url]['prev']:
-                self.map[url]['prev']['next'] = self.map[url]['next']
+            if self.map[idx]['prev']:
+                self.map[idx]['prev']['next'] = self.map[idx]['next']
             # 最後の要素だったら
             if url == self.tail['key']:
                 self.tail = self.tail['prev']
+            self.current_len -= 1
+            
+        self.current_len += 1
+
         # 今回アクセスされたページ
         page = {'key': url, 'value': contents, 'next': self.head, 'prev': None}
-        # 最初の要素の時
+        # mapが空の時
         if (not self.tail):
             self.tail = page
         else :
             self.head['prev'] = page
         self.head = page
 
-        
-
-        self.map[url] = page
+        self.map[idx] = page
         
         # 上限を超えた時
-        if len(self.map) > self.capacity:
+        if self.current_len > self.capacity:
+            self.map.pop(self.hash(self.tail['key']))
             # 上限が1の時超えてしまうので
-            self.map.pop(self.tail['key'])
             if self.tail['prev'] :
                 self.tail['prev']['next'] = None
             self.tail = self.tail['prev']
+            self.current_len -= 1
             
         
-
     # Return the URLs stored in the cache. The URLs are ordered
     # in the order in which the URLs are mostly recently accessed.
     def get_pages(self):
@@ -103,6 +114,7 @@ def cache_test():
     #   (most recently accessed)<-- "a.com", "d.com", "c.com", "b.com" -->(least recently accessed)
     equal(cache.get_pages(), ["a.com", "d.com", "c.com", "b.com"])
     cache.access_page("c.com", "CCC")
+    print(cache.get_pages())
     equal(cache.get_pages(), ["c.com", "a.com", "d.com", "b.com"])
     cache.access_page("a.com", "AAA")
     equal(cache.get_pages(), ["a.com", "c.com", "d.com", "b.com"])
