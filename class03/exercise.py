@@ -35,6 +35,18 @@ def readDivide(line, index):
     return token, index + 1
 
 
+# 開きかっこ
+def readOpenBrackets(line, index):
+    token = {'type': 'OPEN'}
+    return token, index + 1
+
+
+# 閉じかっこ
+def readCloseBrackets(line, index):
+    token = {'type': 'CLOSE'}
+    return token, index + 1
+
+
 def tokenize(line):
     tokens = []
     index = 0
@@ -49,10 +61,31 @@ def tokenize(line):
             (token, index) = readMulti(line, index)
         elif line[index] == '/':
             (token, index) = readDivide(line, index)
+        elif line[index] == '(':
+            (token, index) = readOpenBrackets(line, index)
+        elif line[index] == ')':
+            (token, index) = readCloseBrackets(line, index)
         else:
             print('Invalid character found: ' + line[index])
             exit(1)
         tokens.append(token)
+    return tokens
+
+
+# かっこの中身を評価
+def evaluate_brackets(tokens):
+    index = 0
+    while index < len(tokens):
+        # 開きかっこがきたら、
+        # そのあとの要素を引数にして自分自身を呼び出し
+        if tokens[index]['type'] == 'OPEN':
+            return tokens[:index] + evaluate_brackets(tokens[index + 1:]) 
+        # 閉じかっこがきたら、
+        # その前までの要素を計算してNUMBERにしたものと、閉じかっこのあとの要素を引数にして自分自身を呼び出し
+        elif tokens[index]['type'] == 'CLOSE':
+            return evaluate_brackets([{'type':'NUMBER', 'number':evaluate(tokens[:index])}] + tokens[index + 1:])
+        index += 1
+    # かっこが無くなったら返す
     return tokens
 
 
@@ -94,12 +127,15 @@ def evaluate_plus_minus(tokens):
 
 
 def evaluate(tokens):
-    tokens.insert(0, {'type': 'PLUS'})  # Insert a dummy '+' token
+    # まずは()の中身を評価
+    tokens_without_branckets = evaluate_brackets(tokens)
+
+    tokens_without_branckets.insert(0, {'type': 'PLUS'})  # Insert a dummy '+' token
     
     # 割り算と掛け算は優先
-    evaluate_multi_devide(tokens)
+    evaluate_multi_devide(tokens_without_branckets)
     # 足し算と引き算はそのあと
-    answer = evaluate_plus_minus(tokens)
+    answer = evaluate_plus_minus(tokens_without_branckets)
 
     return answer
 
@@ -117,6 +153,7 @@ def test(line):
 # Add more tests to this function :)
 def runTest():
     print("==== Test started! ====")
+
     test("1")
     # 足し算
     test("1+2")
@@ -153,14 +190,25 @@ def runTest():
     test("-3.0-4*2-1/5")
     test("-3.99991-4.4*2.3321-1/5")
     test("-3.99991-4.4*2.3321-1/5*4/4+1.2222-3.4*333-2144/44444")
+    # かっこ
+    test("(1)")
+    test("(1+2)")
+    test("(1+2)+3")
+    test("2+(-1)+3")
+    test("2*(2+3)")
+    test("((1+2)+3)")
+    test("((1+2)*3)")
+    test("2+(((((1+2)+3)+6)*9))")
+    test("(1+2)/(3.0*3-4.6+2)*8-1.9999")
+
     print("==== Test finished! ====\n")
 
 
 runTest()
 
-while True:
-    print('> ', end="")
-    line = input()
-    tokens = tokenize(line)
-    answer = evaluate(tokens)
-    print("answer = %f\n" % answer)
+# while True:
+#     print('> ', end="")
+#     line = input()
+#     tokens = tokenize(line)
+#     answer = evaluate(tokens)
+#     print("answer = %f\n" % answer)
