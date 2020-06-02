@@ -90,17 +90,15 @@ def evaluate_brackets(tokens):
 
 
 # 掛け算と割り算を計算
-## answerを計算しているわけではないが、evaluate_plus_minusと返り値を揃えるために
-## answerを返した方がいいのでしょうか…？
 def evaluate_multi_devide(tokens):
     index = 1
     while index < len(tokens):
         # a * b ->　aの部分に計算結果を保存
         if tokens[index]['type'] in ['MULTI', 'DIVIDE']:
             if tokens[index]['type'] == 'MULTI':
-                tokens[index - 1]['number'] = tokens[index - 1]['number'] * tokens[index + 1]['number']
+                tokens[index - 1]['number'] *= tokens[index + 1]['number']
             elif tokens[index]['type'] == 'DIVIDE':
-                tokens[index - 1]['number'] = tokens[index - 1]['number'] / tokens[index + 1]['number']
+                tokens[index - 1]['number'] /= tokens[index + 1]['number']
             # a * b ->　* と b は削除
             tokens.pop(index+1)
             tokens.pop(index)
@@ -111,33 +109,42 @@ def evaluate_multi_devide(tokens):
 
 # 足し算と引き算を評価
 def evaluate_plus_minus(tokens):
-    answer = 0
-    index = 1
+    # 式の初めがマイナスなら
+    if tokens[0]['type'] == 'MINUS':
+        tokens[0] = {'type': 'NUMBER', 'number': -tokens[1]['number']}
+        tokens.pop(1)
+
+    index = 1 
+
     while index < len(tokens):
-        if tokens[index]['type'] == 'NUMBER':
-            if tokens[index - 1]['type'] == 'PLUS':
-                answer += tokens[index]['number']
-            elif tokens[index - 1]['type'] == 'MINUS':
-                answer -= tokens[index]['number']
+        if tokens[index]['type'] in ['PLUS', 'MINUS']:
+            if tokens[index]['type'] == 'PLUS':
+                tokens[index - 1]['number'] += tokens[index + 1]['number']
+            elif tokens[index]['type'] == 'MINUS':
+                tokens[index - 1]['number'] -= tokens[index + 1]['number']
             else:
                 print('Invalid syntax')
                 exit(1)
+            tokens.pop(index+1)
+            tokens.pop(index)
+            index -= 1
         index += 1
-    return answer
 
 
 def evaluate(tokens):
     # まずは()の中身を評価
     tokens_without_branckets = evaluate_brackets(tokens)
-
-    tokens_without_branckets.insert(0, {'type': 'PLUS'})  # Insert a dummy '+' token
+    #tokens_without_branckets.insert(0, {'type': 'PLUS'})  # Insert a dummy '+' token
     
     # 割り算と掛け算は優先
     evaluate_multi_devide(tokens_without_branckets)
     # 足し算と引き算はそのあと
-    answer = evaluate_plus_minus(tokens_without_branckets)
-
-    return answer
+    evaluate_plus_minus(tokens_without_branckets)
+    
+    if len(tokens_without_branckets) != 1:
+        print('Invalid syntax')
+        exit(1)
+    return tokens_without_branckets[0]['number']
 
 
 def test(line):
