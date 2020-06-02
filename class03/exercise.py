@@ -89,7 +89,7 @@ def evaluate_brackets(tokens):
         # 閉じかっこがきたら、
         # その前までの要素を計算してNUMBERにしたものと、閉じかっこのあとの要素を引数にして自分自身を呼び出し
         elif tokens[index]['type'] == 'CLOSE':
-            return evaluate_brackets([{'type':'NUMBER', 'number':evaluate(tokens[:index])}] + tokens[index + 1:])
+            return evaluate_brackets([{'type':'NUMBER', 'number':evaluate_formula(tokens[:index])}] + tokens[index + 1:])
         index += 1
     # かっこが無くなったら返す
     return tokens
@@ -144,20 +144,23 @@ def evaluate_plus_minus(tokens):
         index += 1
 
 
-def evaluate(tokens):
-    # まずは()の中身を評価
-    tokens_without_branckets = evaluate_brackets(tokens)
-    #tokens_without_branckets.insert(0, {'type': 'PLUS'})  # Insert a dummy '+' token
-    
+def evaluate_formula(tokens):
     # 割り算と掛け算は優先
-    evaluate_multi_devide(tokens_without_branckets)
+    evaluate_multi_devide(tokens)
     # 足し算と引き算はそのあと
-    evaluate_plus_minus(tokens_without_branckets)
-    
-    if len(tokens_without_branckets) != 1:
+    evaluate_plus_minus(tokens)
+
+    if len(tokens) != 1:
         print('Invalid syntax')
         exit(1)
-    return tokens_without_branckets[0]['number']
+    return tokens[0]['number']
+
+
+def evaluate(tokens):
+    # まずは()の中身を評価
+    tokens_without_branckets = evaluate_brackets(tokens)    
+    
+    return evaluate_formula(tokens_without_branckets)
 
 
 def test(line):
