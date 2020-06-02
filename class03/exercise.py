@@ -72,6 +72,12 @@ def tokenize(line):
     return tokens
 
 
+# 負の数を表すマイナスをそのあとの数字に統合
+def evaluate_negative_number(tokens, index):
+    tokens[index] = {'type': 'NUMBER', 'number': -tokens[index + 1]['number']}
+    tokens.pop(index + 1)
+
+
 # かっこの中身を評価
 def evaluate_brackets(tokens):
     index = 0
@@ -96,8 +102,12 @@ def evaluate_multi_devide(tokens):
         # a * b ->　aの部分に計算結果を保存
         if tokens[index]['type'] in ['MULTI', 'DIVIDE']:
             if tokens[index]['type'] == 'MULTI':
+                if tokens[index + 1]['type'] == 'MINUS':
+                    evaluate_negative_number(tokens, index + 1)
                 tokens[index - 1]['number'] *= tokens[index + 1]['number']
             elif tokens[index]['type'] == 'DIVIDE':
+                if tokens[index + 1]['type'] == 'MINUS':
+                    evaluate_negative_number(tokens, index + 1)
                 tokens[index - 1]['number'] /= tokens[index + 1]['number']
             # a * b ->　* と b は削除
             tokens.pop(index+1)
@@ -111,16 +121,19 @@ def evaluate_multi_devide(tokens):
 def evaluate_plus_minus(tokens):
     # 式の初めがマイナスなら
     if tokens[0]['type'] == 'MINUS':
-        tokens[0] = {'type': 'NUMBER', 'number': -tokens[1]['number']}
-        tokens.pop(1)
+        evaluate_negative_number(tokens, 0)
 
     index = 1 
 
     while index < len(tokens):
         if tokens[index]['type'] in ['PLUS', 'MINUS']:
             if tokens[index]['type'] == 'PLUS':
+                if tokens[index + 1]['type'] == 'MINUS':
+                    evaluate_negative_number(tokens, index + 1)
                 tokens[index - 1]['number'] += tokens[index + 1]['number']
             elif tokens[index]['type'] == 'MINUS':
+                if tokens[index + 1]['type'] == 'MINUS':
+                    evaluate_negative_number(tokens, index + 1)
                 tokens[index - 1]['number'] -= tokens[index + 1]['number']
             else:
                 print('Invalid syntax')
@@ -207,6 +220,14 @@ def runTest():
     test("((1+2)*3)")
     test("2+(((((1+2)+3)+6)*9))")
     test("(1+2)/(3.0*3-4.6+2)*8-1.9999")
+    # 負の数
+    test("-2+-1")
+    test("-2--1")
+    test("-2*-1")
+    test("2*-1")
+    test("-2/-1")
+    test("2/-1")
+
 
     print("==== Test finished! ====\n")
 
