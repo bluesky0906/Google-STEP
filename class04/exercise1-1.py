@@ -1,7 +1,7 @@
 from collections import deque
 
-links_path = 'class04/data/links.txt'
-nk_path = 'class04/data/nicknames.txt'
+LINKS_PATH = 'class04/data/links.txt'
+NK_PATH = 'class04/data/nicknames.txt'
 
 
 class Node:
@@ -64,14 +64,14 @@ def search_dfs(user_map, start_id, target_id):
 if __name__ == '__main__':
     # user_idをkey、Nodeのinstanceをvalueとしたmapを作る
     user_map = {}
-    with open(nk_path) as f:
+    with open(NK_PATH) as f:
         lines = f.readlines()
         for line in lines:
             id, name = line.split('\t')
             user_map[int(id)] = Node(int(id), name)
 
     # follow関係を読み込む
-    with open(links_path) as f:
+    with open(LINKS_PATH) as f:
         lines = f.readlines()
         for line in lines:
             followee_id, follower_id = line.split('\t')
