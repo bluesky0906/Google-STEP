@@ -15,7 +15,7 @@ class Node:
 
 
 # user_idをkey、Nodeのinstanceをvalueとしたdictionaryを作る
-def read_file():
+def read_sns():
     user_dic = {}
     with open(NK_PATH) as f:
         lines = f.readlines()
@@ -76,7 +76,7 @@ def search_dfs(user_map, start_id, target_id):
 
 
 if __name__ == '__main__':
-    user_dic = read_file()
+    user_dic = read_sns()
 
     # adrian から eugene
     result = search_bfs(user_dic, 1, 25)

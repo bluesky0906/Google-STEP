@@ -1,7 +1,7 @@
-from exercise1_1 import search_bfs, read_file
+from exercise1_1 import search_bfs, read_sns
 
 if __name__ == '__main__':
-    user_dic = read_file()
+    user_dic = read_sns()
     length = len(user_dic)
 
     not_connecting = []
