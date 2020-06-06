@@ -14,6 +14,24 @@ class Node:
         self.follow_users.append(id)
 
 
+# user_idをkey、Nodeのinstanceをvalueとしたmapを作る
+def read_file():
+    user_map = {}
+    with open(NK_PATH) as f:
+        lines = f.readlines()
+        for line in lines:
+            id, name = line.split('\t')
+            user_map[int(id)] = Node(int(id), name)
+
+    # follow関係を読み込む
+    with open(LINKS_PATH) as f:
+        lines = f.readlines()
+        for line in lines:
+            followee_id, follower_id = line.split('\t')
+            user_map[int(followee_id)].follow(int(follower_id))
+    return user_map
+
+
 # bfsで探す
 def search_bfs(user_map, start_id, target_id):
     queue = deque()
@@ -62,20 +80,7 @@ def search_dfs(user_map, start_id, target_id):
 
 
 if __name__ == '__main__':
-    # user_idをkey、Nodeのinstanceをvalueとしたmapを作る
-    user_map = {}
-    with open(NK_PATH) as f:
-        lines = f.readlines()
-        for line in lines:
-            id, name = line.split('\t')
-            user_map[int(id)] = Node(int(id), name)
-
-    # follow関係を読み込む
-    with open(LINKS_PATH) as f:
-        lines = f.readlines()
-        for line in lines:
-            followee_id, follower_id = line.split('\t')
-            user_map[int(followee_id)].follow(int(follower_id))
+    user_map = read_file()
 
     # adrian から eugene
     search_bfs(user_map, 1, 25)
