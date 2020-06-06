@@ -38,6 +38,29 @@ def search_bfs(user_map, start_id, target_id):
     return False
 
 
+# dfsで探す
+def search_dfs(user_map, start_id, target_id):
+    # start_idがfollowしているidをstackに入れる
+    stack = user_map[start_id].follow_users
+    # すでに探したid
+    already_searched = set()
+
+    while len(stack) > 0:
+        user = stack.pop()
+        already_searched.add(user)
+        # 探しているuserならreturnする
+        if user == target_id:
+            print('Found!')
+            return True
+        # 探しているuserでなければ、その人がfollowしている人をqueueに追加
+        for new_user in user_map[user].follow_users:
+            # しかしalready_searchedに含まれていない人のみ追加
+            if new_user not in already_searched:
+                stack.append(new_user)
+    print('Not Found!')
+    return False
+
+
 if __name__ == '__main__':
     # user_idをkey、Nodeのinstanceをvalueとしたmapを作る
     user_map = {}
@@ -56,3 +79,5 @@ if __name__ == '__main__':
 
     # adrian から eugene
     search_bfs(user_map, 1, 25)
+    # dfsで探索
+    # search_dfs(user_map, 1, 25)
