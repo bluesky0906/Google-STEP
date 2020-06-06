@@ -15,7 +15,7 @@ class Node:
 
 
 # bfsで探す
-def search_bfs(start_id, target_id):
+def search_bfs(user_map, start_id, target_id):
     queue = deque()
     # start_idがfollowしているidをqueueに入れる
     queue.extend(user_map[start_id].follow_users)
@@ -55,4 +55,4 @@ if __name__ == '__main__':
             user_map[int(followee_id)].follow(int(follower_id))
 
     # adrian から eugene
-    search_bfs(1, 25)
+    search_bfs(user_map, 1, 25)
