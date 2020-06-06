@@ -14,22 +14,22 @@ class Node:
         self.follow_users.append(id)
 
 
-# user_idをkey、Nodeのinstanceをvalueとしたmapを作る
+# user_idをkey、Nodeのinstanceをvalueとしたdictionaryを作る
 def read_file():
-    user_map = {}
+    user_dic = {}
     with open(NK_PATH) as f:
         lines = f.readlines()
         for line in lines:
             id, name = line.split('\t')
-            user_map[int(id)] = Node(int(id), name)
+            user_dic[int(id)] = Node(int(id), name)
 
     # follow関係を読み込む
     with open(LINKS_PATH) as f:
         lines = f.readlines()
         for line in lines:
             followee_id, follower_id = line.split('\t')
-            user_map[int(followee_id)].follow(int(follower_id))
-    return user_map
+            user_dic[int(followee_id)].follow(int(follower_id))
+    return user_dic
 
 
 # bfsで探す
@@ -45,14 +45,12 @@ def search_bfs(user_map, start_id, target_id):
         already_searched.add(user)
         # 探しているuserならreturnする
         if user == target_id:
-            print('Found!')
             return True
         # 探しているuserでなければ、その人がfollowしている人をqueueに追加
         for new_user in user_map[user].follow_users:
             # しかしalready_searchedに含まれていない人のみ追加
             if new_user not in already_searched:
                 queue.append(new_user)
-    print('Not Found!')
     return False
 
 
@@ -68,21 +66,24 @@ def search_dfs(user_map, start_id, target_id):
         already_searched.add(user)
         # 探しているuserならreturnする
         if user == target_id:
-            print('Found!')
             return True
         # 探しているuserでなければ、その人がfollowしている人をqueueに追加
         for new_user in user_map[user].follow_users:
             # しかしalready_searchedに含まれていない人のみ追加
             if new_user not in already_searched:
                 stack.append(new_user)
-    print('Not Found!')
     return False
 
 
 if __name__ == '__main__':
-    user_map = read_file()
+    user_dic = read_file()
 
     # adrian から eugene
-    search_bfs(user_map, 1, 25)
+    result = search_bfs(user_dic, 1, 25)
     # dfsで探索
-    # search_dfs(user_map, 1, 25)
+    # result = search_dfs(user_map, 1, 25)
+
+    if result:
+        print('Found!')
+    else:
+        print('Not Found!')
