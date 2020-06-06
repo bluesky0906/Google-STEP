@@ -20,7 +20,7 @@ def read_file():
     with open(NK_PATH) as f:
         lines = f.readlines()
         for line in lines:
-            id, name = line.split('\t')
+            id, name = line.strip().split('\t')
             user_dic[int(id)] = Node(int(id), name)
 
     # follow関係を読み込む
