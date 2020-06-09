@@ -176,3 +176,6 @@ cython_debug/
 
 # C++
 .o
+
+# data
+data/
