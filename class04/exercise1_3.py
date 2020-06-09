@@ -56,15 +56,9 @@ def dijkstra(station_dic, start, end):
     color[start] = 'GRAY'
 
     # 経路
-<< << << < HEAD
     path = [[]] * length
     # start地点
     path[start].append(station_dic[start].name)
-== == == =
-    path = [''] * length
-    # start地点
-    path[start] = station_dic[start].name
->>>>>> > 01098432ceb743e5edd7f2ffe9125fcfc8b92393
 
     # start地点を優先度つきキューに
     # これで最初にstart地点が取り出される
@@ -98,11 +92,7 @@ def dijkstra(station_dic, start, end):
                     color[next_station[1]] = 'GRAY'
                     # 経路を更新
                     path[next_station[1]] = path[minstation[1]] + \
-<< << << < HEAD
                         [station_dic[next_station[1]].name]
-== == == =
-                        ' -> ' + station_dic[next_station[1]].name
->>>>>> > 01098432ceb743e5edd7f2ffe9125fcfc8b92393
                     heapq.heappush(pq, (new_cost, next_station[1]))
 
     return 'Not Found'
@@ -113,8 +103,4 @@ if __name__ == '__main__':
 
     path = dijkstra(station_dic, 249, 1)
 
-<<<<<<< HEAD
     print(' -> '.join(path))
-=======
-    print(path)
->>>>>>> 01098432ceb743e5edd7f2ffe9125fcfc8b92393
