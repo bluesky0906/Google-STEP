@@ -20,9 +20,9 @@ void print_free_list()
     size_t sum_of_size = 0;
     while (metadata)
     {
-        // metadataのサイズ
+        // flee slotのサイズ
         printf("%d : %zu\n", number, metadata->size);
-        // metadataのアドレス
+        // アドレス
         printf("meta : %p\n", metadata);
         // 次のfree slotのアドレス
         printf("meta next : %p\n", metadata->next);
