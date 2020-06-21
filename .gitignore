@@ -176,6 +176,9 @@ cython_debug/
 
 # C++
 .o
-
+.exe
 # data
 */data/
+
+#.vscode
+.vscode/
