@@ -59,8 +59,9 @@ void check_flagmentation()
         //                           ptr  　　　　　　　　　　current_ptr->next
         //                          ↓
         // ... | metadata |   free slot   | ...
-        else if ((void *)current_ptr->next - ptr < sizeof(my_metadata_t))
+        else if ((void *)current_ptr->next - ptr <= sizeof(my_metadata_t))
         {
+            //printf("%zu\n", (void *)current_ptr->next - ptr);
             int remaining_size = (void *)current_ptr->next - ptr;
             current_ptr->size += remaining_size + current_ptr->next->size + sizeof(my_metadata_t);
             current_ptr->next = current_ptr->next->next;
@@ -81,8 +82,8 @@ void add_to_free_list(my_metadata_t *metadata)
     my_metadata_t *ptr = my_heap.free_head;
     my_metadata_t *ptr_prev = NULL;
 
-    // metadataがptrよりも前の位置を指している間
-    while (ptr && metadata > ptr && ptr != &my_heap.dummy)
+    // // metadataがptrよりも前の位置を指している間
+    while (ptr != &my_heap.dummy && ptr < metadata)
     {
         // 下の状態になるまで続ける
         // ... | metadata | free slot |   ...   | metadata | object | metadata | free slot |
@@ -92,10 +93,11 @@ void add_to_free_list(my_metadata_t *metadata)
         ptr = ptr->next;
     }
     metadata->next = ptr;
-    // Listの最初に挿入するとき
+
     // ... | metadata | object |   ...  | metadata | free slot | ...
     //     ^                            ^　　　　　　　　　　　
     //  metadata                    free_head
+    // Listの最初に挿入するとき
     if (!ptr_prev)
     {
         my_heap.free_head = metadata;
@@ -104,6 +106,7 @@ void add_to_free_list(my_metadata_t *metadata)
     {
         ptr_prev->next = metadata;
     }
+    //print_free_list();
     check_flagmentation();
 }
 
@@ -141,7 +144,7 @@ void *my_malloc(size_t size)
     }
 
     // Exactly-Fitであてはまらない時
-    if (metadata == &my_heap.dummy)
+    if (metadata->size != size)
     {
         metadata = my_heap.free_head;
         prev = NULL;
@@ -152,6 +155,29 @@ void *my_malloc(size_t size)
             metadata = metadata->next;
         }
     }
+
+    // size_t min_size = SIZE_MAX;
+    // // Exactly-fit
+    // while (metadata != &my_heap.dummy && metadata->size != size)
+    // {
+    //     if (metadata->size > size && metadata->size - size < min_size)
+    //         min_size = metadata->size - size;
+    //     prev = metadata;
+    //     metadata = metadata->next;
+    // }
+
+    // // Exactly-Fitであてはまらない時
+    // if (metadata->size != size)
+    // {
+    //     metadata = my_heap.free_head;
+    //     prev = NULL;
+    //     // Best-fit
+    //     while (metadata && metadata->size - size != min_size)
+    //     {
+    //         prev = metadata;
+    //         metadata = metadata->next;
+    //     }
+    // }
 
     if (!metadata)
     {
@@ -242,22 +268,25 @@ void my_free(void *ptr)
         munmap_to_system(free, size);
     }
     // 4KB以上の空きの時
-    // else if (free->size > BUFFER_SIZE)
-    // {
-    //     // ... | metadata |            free slot               |
-    //     //     ^                        ^<--------------------->
-    //     //    free                   begin   BUFFERSIZE * n
-    //     // ... | metadata |  free slot  | metadata | free slot |
-    //     size_t n = free->size / BUFFER_SIZE;
+    else if (free->size > BUFFER_SIZE)
+    {
 
-    //     free->size -= BUFFER_SIZE * n;
-    //     my_metadata_t *begin = (my_metadata_t *)((char *)free + size - BUFFER_SIZE * n);
+        // ... | metadata |            free slot               |
+        //     ^                        ^<--------------------->
+        //    free                   begin   BUFFERSIZE * n
+        // ... | metadata |  free slot  | metadata | free slot |
+        size_t n = free->size / BUFFER_SIZE;
 
-    //     begin->size = BUFFER_SIZE * n - sizeof(my_metadata_t);
-    //     begin->next = NULL;
-    //     // CHALLENGE4でassertionエラー
-    //     munmap_to_system(begin, BUFFER_SIZE * n);
-    // }
+        my_metadata_t *begin = (my_metadata_t *)((char *)free + size - BUFFER_SIZE * n);
+
+        // 末尾にデータが入っていたら
+        if ((uintptr_t)(begin) % 4096 != 0)
+            return;
+
+        free->size -= BUFFER_SIZE * n;
+        begin->size = BUFFER_SIZE * n - sizeof(my_metadata_t);
+        munmap_to_system(begin, BUFFER_SIZE * n);
+    }
 }
 
 void my_test()
