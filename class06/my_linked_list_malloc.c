@@ -297,19 +297,35 @@ void my_test()
     printf("Step %d\n", 8);
     print_free_list();
 
-    my_free(ptrs[3]);
+    my_free(ptrs[1]);
     printf("Step %d\n", 9);
     print_free_list();
 
-    my_free(ptrs[0]);
+    ptrs[1] = my_malloc(9900);
     printf("Step %d\n", 10);
     print_free_list();
 
-    my_free(ptrs[4]);
+    ptrs[2] = my_malloc(1084);
     printf("Step %d\n", 11);
     print_free_list();
 
     my_free(ptrs[1]);
     printf("Step %d\n", 12);
+    print_free_list();
+
+    my_free(ptrs[3]);
+    printf("Step %d\n", 13);
+    print_free_list();
+
+    my_free(ptrs[2]);
+    printf("Step %d\n", 14);
+    print_free_list();
+
+    my_free(ptrs[4]);
+    printf("Step %d\n", 15);
+    print_free_list();
+
+    my_free(ptrs[0]);
+    printf("Step %d\n", 16);
     print_free_list();
 }
