@@ -252,6 +252,7 @@ void simple_free(void *ptr)
 
 void test()
 {
+  my_initialize();
   void *ptr = my_malloc(96);
 
   for (int i = 0; i < 100; i++)
