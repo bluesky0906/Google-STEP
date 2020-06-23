@@ -91,9 +91,6 @@ void add_to_free_list(my_metadata_t *metadata)
         ptr_prev = ptr;
         ptr = ptr->next;
     }
-    if (!ptr)
-    {
-    }
     metadata->next = ptr;
     // Listの最初に挿入するとき
     // ... | metadata | object |   ...  | metadata | free slot | ...
@@ -136,12 +133,26 @@ void *my_malloc(size_t size)
 {
     my_metadata_t *metadata = my_heap.free_head;
     my_metadata_t *prev = NULL;
-    // First-fit: Find the first free slot the object fits.
-    while (metadata && metadata->size < size)
+    // Exactly-Fit
+    while (metadata != &my_heap.dummy && metadata->size != size)
     {
         prev = metadata;
         metadata = metadata->next;
     }
+
+    // Exactly-Fitであてはまらない時
+    if (metadata == &my_heap.dummy)
+    {
+        metadata = my_heap.free_head;
+        prev = NULL;
+        // First-fit: Find the first free slot the object fits.
+        while (metadata && metadata->size < size)
+        {
+            prev = metadata;
+            metadata = metadata->next;
+        }
+    }
+
     if (!metadata)
     {
         // There was no free slot available. We need to request a new memory region
@@ -201,21 +212,58 @@ void my_free(void *ptr)
     // Add the free slot to the free list.
     add_to_free_list(metadata);
 
-    // データが一つも残っていなかったら解放
-    // 速度も効率も上がらなかったのでボツ
-    // my_metadata_t *head = my_heap.free_head;
-    // int n = head->size / BUFFER_SIZE;
-    // size_t size = head->size + (sizeof(my_metadata_t)) * (n + 1);
-    // if (size % BUFFER_SIZE == 0)
+    my_metadata_t *free = my_heap.free_head;
+    my_metadata_t *prev = NULL;
+    // 一番最後
+    while (free && free->next != &my_heap.dummy)
+    {
+        prev = free;
+        free = free->next;
+    }
+    size_t size = free->size + (sizeof(my_metadata_t));
+
+    // ぴったり4KBの空きのとき
+    if (size % BUFFER_SIZE == 0)
+    {
+        // ... | metadata |        free slot        |
+        //     ^<----------------------------------->
+        //    free           BUFFERSIZE * n
+
+        // Free Listの一番はじめなら
+        if (my_heap.free_head == free)
+        {
+            my_heap.free_head = free->next;
+        }
+        else
+        {
+            prev->next = free->next;
+        }
+
+        munmap_to_system(free, size);
+    }
+    // 4KB以上の空きの時
+    // else if (free->size > BUFFER_SIZE)
     // {
-    //     my_heap.free_head = head->next;
-    //     munmap_to_system(head, size);
+    //     // ... | metadata |            free slot               |
+    //     //     ^                        ^<--------------------->
+    //     //    free                   begin   BUFFERSIZE * n
+    //     // ... | metadata |  free slot  | metadata | free slot |
+    //     size_t n = free->size / BUFFER_SIZE;
+
+    //     free->size -= BUFFER_SIZE * n;
+    //     my_metadata_t *begin = (my_metadata_t *)((char *)free + size - BUFFER_SIZE * n);
+
+    //     begin->size = BUFFER_SIZE * n - sizeof(my_metadata_t);
+    //     begin->next = NULL;
+    //     // CHALLENGE4でassertionエラー
+    //     munmap_to_system(begin, BUFFER_SIZE * n);
     // }
 }
 
 void my_test()
 {
     my_initialize();
+
     void *ptrs[5];
     ptrs[0] = my_malloc(100);
     printf("Step %d\n", 1);
